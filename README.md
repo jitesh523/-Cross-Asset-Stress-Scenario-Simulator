@@ -4,7 +4,7 @@ A comprehensive tool for simulating stress scenarios across multiple asset class
 
 ## Project Status
 
-**Current Phase**: Phase 1 - Data Ingestion and Preparation ✅
+**Current Phase**: Phase 2 - Core Simulation Engine ✅
 
 ## Features
 
@@ -15,6 +15,15 @@ A comprehensive tool for simulating stress scenarios across multiple asset class
 - Data validation and quality checks
 - Data transformation pipeline (returns, volatility, technical indicators)
 - PostgreSQL database with optimized schema
+
+### Phase 2: Core Simulation Engine ✅
+- Monte Carlo simulation using Geometric Brownian Motion
+- Historical simulation with bootstrap resampling
+- Correlation matrix calculation with Cholesky decomposition
+- Multi-asset simulation with correlation support
+- Value at Risk (VaR) and Conditional VaR (CVaR) calculation
+- Scenario adjustment capabilities (shocks to returns, volatility, correlations)
+- Comprehensive simulation statistics and analytics
 
 ## Architecture
 
