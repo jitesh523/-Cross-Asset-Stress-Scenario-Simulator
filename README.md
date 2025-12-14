@@ -4,7 +4,7 @@ A comprehensive tool for simulating stress scenarios across multiple asset class
 
 ## Project Status
 
-**Current Phase**: Phase 3 - Scenario Definition and Management ✅
+**Current Phase**: Phase 4 - Results Analysis and Visualization ✅
 
 ## Features
 
@@ -37,6 +37,18 @@ A comprehensive tool for simulating stress scenarios across multiple asset class
 - Scenario versioning and tagging
 - Integration with simulation engine
 - Scenario result storage and retrieval
+
+### Phase 4: Results Analysis and Visualization ✅
+- FastAPI REST API with comprehensive endpoints
+  - Simulation execution and comparison
+  - Scenario management (CRUD)
+  - Results retrieval and analysis
+- Interactive web dashboard
+  - Real-time system statistics
+  - Scenario browser
+  - Recent simulations display
+- Export functionality (JSON, CSV)
+- API documentation (Swagger/OpenAPI)
 
 ## Architecture
 
@@ -115,6 +127,25 @@ This will:
 2. Fetch historical data for predefined assets
 3. Ingest economic indicators (if FRED API key is provided)
 4. Store all data in PostgreSQL
+
+### Run API Server and Dashboard
+
+```bash
+# Start the FastAPI server
+python run_api_server.py
+```
+
+The API will be available at:
+- **API Base**: http://localhost:8000
+- **API Docs**: http://localhost:8000/docs (Swagger UI)
+- **Dashboard**: Open `frontend/index.html` in your browser
+
+API Endpoints:
+- `POST /api/simulations/run` - Run simulations
+- `GET /api/scenarios/` - List scenarios
+- `POST /api/scenarios/{id}/run` - Run scenario
+- `GET /api/analysis/results` - Get results
+- `GET /api/analysis/summary` - Get system summary
 
 ### Asset Coverage
 
