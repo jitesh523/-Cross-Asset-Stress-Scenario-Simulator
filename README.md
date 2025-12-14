@@ -4,7 +4,7 @@ A comprehensive tool for simulating stress scenarios across multiple asset class
 
 ## Project Status
 
-**Current Phase**: Phase 2 - Core Simulation Engine ✅
+**Current Phase**: Phase 3 - Scenario Definition and Management ✅
 
 ## Features
 
@@ -24,6 +24,19 @@ A comprehensive tool for simulating stress scenarios across multiple asset class
 - Value at Risk (VaR) and Conditional VaR (CVaR) calculation
 - Scenario adjustment capabilities (shocks to returns, volatility, correlations)
 - Comprehensive simulation statistics and analytics
+
+### Phase 3: Scenario Definition and Management ✅
+- Predefined stress scenarios based on historical events
+  - 2008 Financial Crisis
+  - COVID-19 Market Crash (March 2020)
+  - Interest Rate Shock (+200 bps)
+  - Oil Price Shock (+100%)
+  - Volatility Spike
+  - Currency Crisis
+- Scenario CRUD operations (Create, Read, Update, Delete)
+- Scenario versioning and tagging
+- Integration with simulation engine
+- Scenario result storage and retrieval
 
 ## Architecture
 
@@ -169,8 +182,8 @@ with db_manager.get_session() as db:
 ## Roadmap
 
 - [x] **Phase 1**: Data Ingestion and Preparation
-- [ ] **Phase 2**: Core Simulation Engine
-- [ ] **Phase 3**: Scenario Definition and Management
+- [x] **Phase 2**: Core Simulation Engine
+- [x] **Phase 3**: Scenario Definition and Management
 - [ ] **Phase 4**: Results Analysis and Visualization
 - [ ] **Phase 5**: Deployment and Integration
 
