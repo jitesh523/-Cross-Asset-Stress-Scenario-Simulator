@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database with TimescaleDB
+  postgres:
+    image: timescale/timescaledb:latest-pg15
+    container_name: simulator-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-simulator}
+      POSTGRES_USER: ${POSTGRES_USER:-simulator_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-simulator_pass}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-simulator_user}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - simulator-network
+
+  # Application API Server
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: simulator-api
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-simulator_user}:${POSTGRES_PASSWORD:-simulator_pass}@postgres:5432/${POSTGRES_DB:-simulator}
+      FRED_API_KEY: ${FRED_API_KEY}
+      ALPHA_VANTAGE_API_KEY: ${ALPHA_VANTAGE_API_KEY}
+      DATA_START_DATE: ${DATA_START_DATE:-2019-01-01}
+      DATA_END_DATE: ${DATA_END_DATE:-2024-12-31}
+      DATA_INTERVAL: ${DATA_INTERVAL:-1d}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./backend:/app/backend
+      - ./frontend:/app/frontend
+    networks:
+      - simulator-network
+    restart: unless-stopped
+
+  # Nginx for serving frontend and reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: simulator-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+    networks:
+      - simulator-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  simulator-network:
+    driver: bridge
