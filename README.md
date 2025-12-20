@@ -62,6 +62,12 @@ A comprehensive tool for simulating stress scenarios across multiple asset class
 - Health checks and monitoring
 - Cloud deployment guides (AWS, GCP, Azure)
 
+### Big Upgrade: Intelligence & Aesthetics 🚀
+- **AI Scenario Generator**: Use LLMs (OpenAI/Anthropic) to generate complex scenarios from natural language.
+- **Portfolio Optimization**: Mean-Variance Optimization (MVO) engine for defensive rebalancing suggestions.
+- **Modern React Dashboard**: Built with Vite, React, Tailwind CSS, and Recharts for a premium enterprise experience.
+- **Real-time Analytics**: Interactive charts and system health monitoring.
+
 ## Architecture
 
 ```

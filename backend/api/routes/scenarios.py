@@ -9,6 +9,7 @@ import logging
 from backend.database import get_db
 from backend.scenarios.scenario_service import ScenarioService
 from backend.scenarios.predefined_scenarios import PredefinedScenarios
+from backend.scenarios.ai_engine import AIScenarioEngine
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +48,12 @@ class ScenarioRunRequest(BaseModel):
     method: str = 'monte_carlo'
     num_simulations: int = 1000
     num_days: int = 252
+
+
+class AIGenerateRequest(BaseModel):
+    """Request model for AI scenario generation."""
+    prompt: str
+    provider: Optional[str] = "openai"
 
 
 @router.get("/", response_model=List[ScenarioResponse])
@@ -170,6 +177,42 @@ async def create_scenario(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Failed to create scenario: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/generate-ai")
+async def generate_ai_scenario(
+    request: AIGenerateRequest,
+    db: Session = Depends(get_db)
+):
+    """Generate a scenario using AI.
+    
+    Args:
+        request: AI generation parameters
+        db: Database session
+        
+    Returns:
+        Generated scenario parameters
+    """
+    try:
+        # Get available tickers for context
+        # In a real app, this would come from a registry or database
+        available_assets = [
+            "SPY", "QQQ", "DIA", "IWM", "AAPL", "MSFT", "GOOGL", "AMZN",
+            "TLT", "IEF", "SHY", "LQD", "HYG",
+            "GLD", "SLV", "USO", "DBA",
+            "EUR/USD", "GBP/USD", "JPY/USD", "AUD/USD"
+        ]
+        
+        engine = AIScenarioEngine(provider=request.provider)
+        result = engine.generate_scenario_params(request.prompt, available_assets)
+        
+        return result
+        
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Failed to generate AI scenario: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
