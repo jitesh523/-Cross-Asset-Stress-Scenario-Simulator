@@ -8,6 +8,7 @@ import logging
 
 from backend.database import get_db
 from backend.simulation.engine import SimulationEngine
+from backend.simulation.optimizer import PortfolioOptimizer
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +26,14 @@ class SimulationRequest(BaseModel):
     use_correlation: Optional[bool] = True
     block_size: Optional[int] = 1
     random_seed: Optional[int] = None
+
+
+class OptimizationRequest(BaseModel):
+    """Request model for portfolio optimization."""
+    tickers: List[str]
+    start_date: str
+    end_date: str
+    scenario_adjustments: Optional[dict] = None
 
 
 class SimulationResponse(BaseModel):
@@ -115,4 +124,54 @@ async def compare_methods(
         
     except Exception as e:
         logger.error(f"Comparison failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/optimize")
+async def optimize_portfolio(
+    request: OptimizationRequest,
+    db: Session = Depends(get_db)
+):
+    """Optimize portfolio weights.
+    
+    Args:
+        request: Optimization parameters
+        db: Database session
+        
+    Returns:
+        Optimal weights for Max Sharpe and Min Volatility
+    """
+    try:
+        engine = SimulationEngine(db)
+        
+        # Prepare data
+        data = engine.prepare_simulation_data(
+            request.tickers,
+            request.start_date,
+            request.end_date
+        )
+        
+        # Apply scenario adjustments if provided
+        if request.scenario_adjustments:
+            data = engine._apply_scenario_adjustments(data, request.scenario_adjustments)
+            
+        # Initialize optimizer
+        optimizer = PortfolioOptimizer(
+            expected_returns=data['expected_returns'],
+            correlation_matrix=data['correlation_matrix'],
+            volatilities=data['volatilities']
+        )
+        
+        # Run optimizations
+        max_sharpe = optimizer.optimize_maximum_sharpe()
+        min_vol = optimizer.optimize_minimum_volatility()
+        
+        return {
+            'max_sharpe': max_sharpe,
+            'min_volatility': min_vol,
+            'tickers': request.tickers
+        }
+        
+    except Exception as e:
+        logger.error(f"Optimization failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
