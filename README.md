@@ -156,11 +156,14 @@ python run_api_server.py
 The API will be available at:
 - **API Base**: http://localhost:8000
 - **API Docs**: http://localhost:8000/docs (Swagger UI)
-- **Dashboard**: Open `frontend/index.html` in your browser
+- **Dashboard (Modern)**: Run `npm run dev` in `frontend/` and visit http://localhost:5173
+- **Classic Dashboard**: Open `frontend/index.html` in your browser (Legacy)
 
 API Endpoints:
 - `POST /api/simulations/run` - Run simulations
+- `POST /api/simulations/optimize` - Portfolio optimization
 - `GET /api/scenarios/` - List scenarios
+- `POST /api/scenarios/generate-ai` - AI-driven scenario generation
 - `POST /api/scenarios/{id}/run` - Run scenario
 - `GET /api/analysis/results` - Get results
 - `GET /api/analysis/summary` - Get system summary

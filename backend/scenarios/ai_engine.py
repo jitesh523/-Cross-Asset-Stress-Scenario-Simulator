@@ -75,10 +75,10 @@ class AIScenarioEngine:
             response = self.client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {{"role": "system", "content": system_prompt}},
-                    {{"role": "user", "content": prompt}}
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": prompt}
                 ],
-                response_format={{ "type": "json_object" }}
+                response_format={ "type": "json_object" }
             )
             result = json.loads(response.choices[0].message.content)
         else:  # anthropic
@@ -87,7 +87,7 @@ class AIScenarioEngine:
                 max_tokens=2000,
                 system=system_prompt,
                 messages=[
-                    {{"role": "user", "content": prompt}}
+                    {"role": "user", "content": prompt}
                 ]
             )
             # Claude sometimes adds text before/after JSON
