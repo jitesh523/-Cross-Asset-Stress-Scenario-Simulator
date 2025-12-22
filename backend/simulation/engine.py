@@ -100,6 +100,7 @@ class SimulationEngine:
         num_days: int = 252,
         use_correlation: bool = True,
         random_seed: Optional[int] = None,
+        regime_aware: bool = False,
         scenario_adjustments: Optional[Dict] = None
     ) -> Dict:
         """Run Monte Carlo simulation.
@@ -140,7 +141,8 @@ class SimulationEngine:
         results = mc_sim.simulate(
             num_simulations=num_simulations,
             num_days=num_days,
-            random_seed=random_seed
+            random_seed=random_seed,
+            regime_aware=regime_aware
         )
         
         # Calculate statistics

@@ -30,19 +30,26 @@ class PortfolioOptimizer:
         
         self.num_assets = len(self.tickers)
 
-    def portfolio_performance(self, weights: np.ndarray) -> Tuple[float, float, float]:
-        """Calculate portfolio annual return, volatility and Sharpe ratio.
+    def portfolio_performance(self, weights: np.ndarray) -> Tuple[float, float, float, float]:
+        """Calculate portfolio annual return, volatility, Sharpe ratio and Expected Shortfall.
         
         Args:
             weights: Asset weights
             
         Returns:
-            Tuple of (return, volatility, Sharpe ratio)
+            Tuple of (return, volatility, Sharpe ratio, expected_shortfall)
         """
         port_return = np.sum(self.returns * weights)
         port_vol = np.sqrt(weights.T @ self.covariance @ weights)
         sharpe = port_return / port_vol if port_vol > 0 else 0
-        return port_return, port_vol, sharpe
+        
+        # Parametric Expected Shortfall (95% confidence, normal distribution)
+        # CVaR = mu - (phi(z)/alpha) * sigma
+        # z = 1.645 (for 95%), phi(z) = 0.103, alpha = 0.05
+        # CVaR scale factor approx 2.06
+        es = port_return - 2.06 * port_vol
+        
+        return port_return, port_vol, sharpe, es
 
     def _neg_sharpe(self, weights: np.ndarray) -> float:
         """Negative Sharpe ratio to maximize it using minimize()."""
@@ -69,14 +76,15 @@ class PortfolioOptimizer:
             return {'success': False, 'message': opts.message}
             
         weights = opts.x
-        ret, vol, sharpe = self.portfolio_performance(weights)
+        ret, vol, sharpe, es = self.portfolio_performance(weights)
         
         return {
             'success': True,
             'weights': dict(zip(self.tickers, weights.tolist())),
             'expected_return': ret,
             'volatility': vol,
-            'sharpe_ratio': sharpe
+            'sharpe_ratio': sharpe,
+            'expected_shortfall': es
         }
 
     def optimize_minimum_volatility(self) -> Dict:
@@ -96,12 +104,13 @@ class PortfolioOptimizer:
             return {'success': False, 'message': opts.message}
             
         weights = opts.x
-        ret, vol, sharpe = self.portfolio_performance(weights)
+        ret, vol, sharpe, es = self.portfolio_performance(weights)
         
         return {
             'success': True,
             'weights': dict(zip(self.tickers, weights.tolist())),
             'expected_return': ret,
             'volatility': vol,
-            'sharpe_ratio': sharpe
+            'sharpe_ratio': sharpe,
+            'expected_shortfall': es
         }

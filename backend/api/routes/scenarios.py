@@ -48,6 +48,7 @@ class ScenarioRunRequest(BaseModel):
     method: str = 'monte_carlo'
     num_simulations: int = 1000
     num_days: int = 252
+    regime_aware: Optional[bool] = False
 
 
 class AIGenerateRequest(BaseModel):
@@ -242,7 +243,8 @@ async def run_scenario(
             end_date=request.end_date,
             method=request.method,
             num_simulations=request.num_simulations,
-            num_days=request.num_days
+            num_days=request.num_days,
+            regime_aware=request.regime_aware
         )
         
         return results
