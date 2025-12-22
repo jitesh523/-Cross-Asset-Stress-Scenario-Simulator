@@ -33,10 +33,6 @@ class Settings(BaseSettings):
     debug: bool = False
     log_level: str = "INFO"
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
-
     @property
     def start_date(self) -> datetime:
         """Parse start date string to datetime."""

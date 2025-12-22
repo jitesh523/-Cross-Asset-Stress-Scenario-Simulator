@@ -9,6 +9,7 @@ import logging
 from backend.database import get_db
 from backend.simulation.engine import SimulationEngine
 from backend.simulation.optimizer import PortfolioOptimizer
+from backend.simulation.hedging_service import HedgingService
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +27,7 @@ class SimulationRequest(BaseModel):
     use_correlation: Optional[bool] = True
     block_size: Optional[int] = 1
     random_seed: Optional[int] = None
+    regime_aware: Optional[bool] = False
 
 
 class OptimizationRequest(BaseModel):
@@ -166,9 +168,14 @@ async def optimize_portfolio(
         max_sharpe = optimizer.optimize_maximum_sharpe()
         min_vol = optimizer.optimize_minimum_volatility()
         
+        # Generate hedging suggestions for Min Volatility by default
+        hedger = HedgingService(request.tickers)
+        suggestions = hedger.generate_recommendations(min_vol)
+        
         return {
             'max_sharpe': max_sharpe,
             'min_volatility': min_vol,
+            'hedging_suggestions': suggestions,
             'tickers': request.tickers
         }
         

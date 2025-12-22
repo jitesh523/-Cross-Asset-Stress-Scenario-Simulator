@@ -80,9 +80,10 @@ def test_portfolio_performance(mock_portfolio_data):
     
     # Equal weights
     weights = np.array([1/3, 1/3, 1/3])
-    ret, vol, sharpe = optimizer.portfolio_performance(weights)
+    ret, vol, sharpe, es = optimizer.portfolio_performance(weights)
     
     expected_ret = (0.10 + 0.04 + 0.02) / 3
     assert pytest.approx(ret) == expected_ret
     assert vol > 0
     assert pytest.approx(sharpe) == ret / vol
+    assert es < ret  # ES should be worse than mean return

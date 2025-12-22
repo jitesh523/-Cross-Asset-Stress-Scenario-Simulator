@@ -40,7 +40,8 @@ class MonteCarloSimulation:
         num_simulations: int = 1000,
         num_days: int = 252,
         dt: float = 1/252,
-        random_seed: Optional[int] = None
+        random_seed: Optional[int] = None,
+        regime_aware: bool = False
     ) -> Dict[str, np.ndarray]:
         """Run Monte Carlo simulation.
         
@@ -49,17 +50,15 @@ class MonteCarloSimulation:
             num_days: Number of time steps (trading days)
             dt: Time step size (1/252 for daily with annual parameters)
             random_seed: Random seed for reproducibility
+            regime_aware: If True, correlations increase during stress (convergence)
             
         Returns:
-            Dictionary with simulation results:
-                - 'prices': 3D array (num_assets, num_simulations, num_days)
-                - 'returns': 3D array of returns
-                - 'final_prices': 2D array (num_assets, num_simulations)
+            Dictionary with simulation results
         """
         if random_seed is not None:
             np.random.seed(random_seed)
         
-        logger.info(f"Running {num_simulations} simulations for {num_days} days")
+        logger.info(f"Running {num_simulations} simulations for {num_days} days (Regime-Aware: {regime_aware})")
         
         num_assets = len(self.tickers)
         
@@ -67,22 +66,61 @@ class MonteCarloSimulation:
         prices = np.zeros((num_assets, num_simulations, num_days + 1))
         prices[:, :, 0] = self.initial_prices[:, np.newaxis]
         
-        # Generate random shocks
+        # Pre-calculate base Cholesky if needed
+        base_cholesky = None
+        stress_cholesky = None
         if self.correlation_matrix is not None:
-            # Correlated random variables using Cholesky decomposition
-            cholesky = np.linalg.cholesky(self.correlation_matrix)
-            random_shocks = self._generate_correlated_shocks(
-                num_assets, num_simulations, num_days, cholesky
-            )
-        else:
-            # Independent random variables
-            random_shocks = np.random.normal(0, 1, (num_assets, num_simulations, num_days))
-        
-        # Simulate price paths using Geometric Brownian Motion
-        # dS = S * (mu * dt + sigma * sqrt(dt) * dW)
+            base_cholesky = np.linalg.cholesky(self.correlation_matrix)
+            
+            if regime_aware:
+                # Create a stress correlation matrix (correlations converge toward 1.0)
+                stress_corr = self.correlation_matrix.copy()
+                n = stress_corr.shape[0]
+                for i in range(n):
+                    for j in range(n):
+                        if i != j:
+                            # Push correlations 30% closer to 1.0
+                            stress_corr[i, j] = stress_corr[i, j] + (1.0 - stress_corr[i, j]) * 0.3
+                
+                # Ensure positive definite
+                from backend.simulation.utils import make_positive_definite
+                stress_corr = make_positive_definite(stress_corr)
+                stress_cholesky = np.linalg.cholesky(stress_corr)
+
+        # Simulate price paths
         for t in range(num_days):
+            # Generate shocks for this step
+            independent_shocks = np.random.normal(0, 1, (num_assets, num_simulations))
+            
+            if base_cholesky is not None:
+                if not regime_aware:
+                    # Constant correlation
+                    shocks = base_cholesky @ independent_shocks
+                else:
+                    # Dynamic correlation based on previous step performance
+                    # (Assume stress if portfolio return at t is < -1.5%)
+                    shocks = np.zeros_like(independent_shocks)
+                    
+                    # For t=0, use base
+                    if t == 0:
+                        shocks = base_cholesky @ independent_shocks
+                    else:
+                        # Calculate returns for the previous step across all simulations
+                        # (Simple average return as proxy for portfolio)
+                        prev_returns = (prices[:, :, t] / prices[:, :, t-1]) - 1
+                        avg_prev_returns = np.mean(prev_returns, axis=0)
+                        
+                        stress_mask = avg_prev_returns < -0.015
+                        
+                        # Apply appropriate Cholesky
+                        shocks[:, ~stress_mask] = base_cholesky @ independent_shocks[:, ~stress_mask]
+                        shocks[:, stress_mask] = stress_cholesky @ independent_shocks[:, stress_mask]
+            else:
+                shocks = independent_shocks
+
+            # Apply Geometric Brownian Motion step
             drift = (self.expected_returns[:, np.newaxis] - 0.5 * self.volatilities[:, np.newaxis]**2) * dt
-            diffusion = self.volatilities[:, np.newaxis] * np.sqrt(dt) * random_shocks[:, :, t]
+            diffusion = self.volatilities[:, np.newaxis] * np.sqrt(dt) * shocks
             
             prices[:, :, t + 1] = prices[:, :, t] * np.exp(drift + diffusion)
         

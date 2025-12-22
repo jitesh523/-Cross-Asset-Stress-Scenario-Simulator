@@ -132,20 +132,8 @@ class CorrelationMatrix:
         Returns:
             Adjusted positive definite matrix
         """
-        # Eigenvalue decomposition
-        eigenvalues, eigenvectors = np.linalg.eigh(matrix)
-        
-        # Adjust negative eigenvalues
-        eigenvalues[eigenvalues < epsilon] = epsilon
-        
-        # Reconstruct matrix
-        adjusted_matrix = eigenvectors @ np.diag(eigenvalues) @ eigenvectors.T
-        
-        # Normalize to correlation matrix (diagonal = 1)
-        d = np.sqrt(np.diag(adjusted_matrix))
-        adjusted_matrix = adjusted_matrix / np.outer(d, d)
-        
-        return adjusted_matrix
+        from backend.simulation.utils import make_positive_definite
+        return make_positive_definite(matrix, epsilon)
 
     def get_correlation(self, ticker1: str, ticker2: str) -> float:
         """Get correlation between two assets.

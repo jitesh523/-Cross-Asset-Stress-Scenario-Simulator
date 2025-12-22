@@ -44,12 +44,26 @@ interface OptimizationResult {
   expected_return: number;
   volatility: number;
   sharpe_ratio: number;
+  expected_shortfall: number;
   weights: Record<string, number>;
+}
+
+interface HedgingSuggestion {
+  trades: {
+    ticker: string;
+    action: 'BUY' | 'SELL';
+    weight_change: number;
+    dollar_value: number;
+    target_weight: number;
+  }[];
+  total_value: number;
+  summary: string;
 }
 
 interface OptimizationResponse {
   max_sharpe: OptimizationResult;
   min_volatility: OptimizationResult;
+  hedging_suggestions: HedgingSuggestion;
 }
 
 const ALL_TICKERS = [
@@ -74,6 +88,7 @@ function App() {
   const [selectedAssets, setSelectedAssets] = useState<string[]>(["SPY", "TLT", "GLD"]);
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [optResults, setOptResults] = useState<OptimizationResponse | null>(null);
+  const [regimeAware, setRegimeAware] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -136,7 +151,8 @@ function App() {
       start_date: "2020-01-01",
       end_date: "2024-12-01",
       num_simulations: 1000,
-      num_days: 252
+      num_days: 252,
+      regime_aware: regimeAware
     });
 
     alert(`Simulation completed for ${name}! View results in Overview.`);
@@ -239,18 +255,33 @@ function App() {
               Risk Phase: Moderate
             </div>
           </div>
-          <div className="flex gap-3">
-            <button
-              onClick={fetchData}
-              className="p-2.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors text-slate-500"
-              title="Refresh Data"
-            >
-              <RefreshCcw size={18} className={loading ? 'animate-spin' : ''} />
-            </button>
-            <button className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200">
-              <PlusCircle size={18} />
-              <span>New Simulation</span>
-            </button>
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100">
+              <div className="flex flex-col text-right">
+                <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Regime Mode</span>
+                <span className="text-xs font-bold text-slate-500">{regimeAware ? 'Stress-Aware' : 'Normal Market'}</span>
+              </div>
+              <button
+                onClick={() => setRegimeAware(!regimeAware)}
+                className={`w-12 h-6 rounded-full transition-all relative ${regimeAware ? 'bg-indigo-600' : 'bg-slate-300'}`}
+              >
+                <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${regimeAware ? 'left-7' : 'left-1'}`}></div>
+              </button>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={fetchData}
+                className="p-2.5 rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors text-slate-500"
+                title="Refresh Data"
+              >
+                <RefreshCcw size={18} className={loading ? 'animate-spin' : ''} />
+              </button>
+              <button className="flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200">
+                <PlusCircle size={18} />
+                <span>New Simulation</span>
+              </button>
+            </div>
           </div>
         </header>
 
@@ -615,6 +646,10 @@ function App() {
                               <span className="text-4xl font-black text-slate-900">{optResults.max_sharpe.sharpe_ratio.toFixed(2)}</span>
                               <span className="text-xs text-slate-400 font-bold uppercase">Sharpe Ratio</span>
                             </div>
+                            <div className="flex flex-col">
+                              <span className="text-2xl font-black text-rose-500">{(optResults.max_sharpe.expected_shortfall * 100).toFixed(1)}%</span>
+                              <span className="text-[10px] text-slate-400 font-bold uppercase">Expected Shortfall</span>
+                            </div>
                           </div>
 
                           <div className="space-y-3">
@@ -651,6 +686,10 @@ function App() {
                               <span className="text-4xl font-black text-white">{(optResults.min_volatility.expected_return * 100).toFixed(1)}%</span>
                               <span className="text-slate-500 text-xs font-bold uppercase">Exp. Return</span>
                             </div>
+                            <div className="flex flex-col">
+                              <span className="text-2xl font-black text-rose-400">{(optResults.min_volatility.expected_shortfall * 100).toFixed(1)}%</span>
+                              <span className="text-slate-500 text-[10px] font-bold uppercase">Exp. Shortfall</span>
+                            </div>
                           </div>
 
                           <div className="space-y-3">
@@ -672,17 +711,36 @@ function App() {
                         </div>
                       </div>
 
-                      <div className="bg-indigo-50 p-6 rounded-2xl border border-indigo-100 flex items-start gap-4">
-                        <ShieldAlert className="text-indigo-600 shrink-0" size={24} />
-                        <div>
-                          <h5 className="font-bold text-indigo-900 uppercase text-xs tracking-widest mb-1">Defense Recommendation</h5>
-                          <p className="text-indigo-700 text-sm leading-relaxed">
-                            Based on current market correlations, a shift towards <strong>{
-                              Object.entries(optResults.min_volatility.weights)
-                                .sort(([, a]: any, [, b]: any) => b - a)[0][0]
-                            }</strong> provides the strongest hedge against systemic volatility spikes.
-                          </p>
+                      <div className="bg-indigo-50 p-6 rounded-2xl border border-indigo-100 space-y-4">
+                        <div className="flex items-start gap-4">
+                          <ShieldAlert className="text-indigo-600 shrink-0" size={24} />
+                          <div>
+                            <h5 className="font-bold text-indigo-900 uppercase text-xs tracking-widest mb-1">Defense Recommendation</h5>
+                            <p className="text-indigo-700 text-sm leading-relaxed">
+                              {optResults.hedging_suggestions?.summary || `Based on current market correlations, a shift towards ${Object.entries(optResults.min_volatility.weights).sort(([, a]: any, [, b]: any) => b - a)[0][0]} provides the strongest hedge.`}
+                            </p>
+                          </div>
                         </div>
+
+                        {optResults.hedging_suggestions?.trades && (
+                          <div className="mt-4 pt-4 border-t border-indigo-200">
+                            <h6 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] mb-3">Tactical Trade suggestions</h6>
+                            <div className="space-y-2">
+                              {optResults.hedging_suggestions.trades.map((trade, i) => (
+                                <div key={i} className="flex items-center justify-between bg-white/50 p-2 rounded-lg text-xs">
+                                  <div className="flex items-center gap-2">
+                                    <span className={`font-black ${trade.action === 'BUY' ? 'text-emerald-600' : 'text-rose-600'}`}>{trade.action}</span>
+                                    <span className="font-bold text-slate-700">{trade.ticker}</span>
+                                  </div>
+                                  <div className="flex gap-4 text-slate-500">
+                                    <span>${trade.dollar_value.toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>
+                                    <span className="font-medium text-slate-400">({(trade.weight_change * 100).toFixed(1)}%)</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </>
                   )}
