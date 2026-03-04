@@ -2,71 +2,50 @@
 
 A comprehensive tool for simulating stress scenarios across multiple asset classes (equities, bonds, commodities, currencies) to assess portfolio risk under extreme market conditions.
 
-## Project Status
-
-**Current Phase**: Phase 5 - Deployment and Integration ✅
-
-**Status**: ✅ **PROJECT COMPLETE** - All 5 phases successfully implemented!
-
 ## Features
 
-### Phase 1: Data Ingestion and Preparation ✅
+### Data Ingestion
 - Multi-source data connectors (Yahoo Finance, FRED API)
 - Support for equities, bonds, commodities, and currencies
 - Economic indicators integration
-- Data validation and quality checks
-- Data transformation pipeline (returns, volatility, technical indicators)
+- Data validation, quality checks, and transformation pipeline
 - PostgreSQL database with optimized schema
 
-### Phase 2: Core Simulation Engine ✅
+### Simulation Engine
 - Monte Carlo simulation using Geometric Brownian Motion
+- Regime-aware Monte Carlo with dynamic correlation adjustments
 - Historical simulation with bootstrap resampling
 - Correlation matrix calculation with Cholesky decomposition
 - Multi-asset simulation with correlation support
-- Value at Risk (VaR) and Conditional VaR (CVaR) calculation
-- Scenario adjustment capabilities (shocks to returns, volatility, correlations)
-- Comprehensive simulation statistics and analytics
 
-### Phase 3: Scenario Definition and Management ✅
-- Predefined stress scenarios based on historical events
+### Risk Analytics
+- Value at Risk (VaR) and Conditional VaR / Expected Shortfall (CVaR)
+- Portfolio optimization via Mean-Variance Optimization (MVO)
+- Tactical hedging recommendations with trade suggestions
+- Scenario adjustment capabilities (shocks to returns, volatility, correlations)
+
+### Stress Scenarios
+- Predefined scenarios based on historical events:
   - 2008 Financial Crisis
   - COVID-19 Market Crash (March 2020)
   - Interest Rate Shock (+200 bps)
   - Oil Price Shock (+100%)
   - Volatility Spike
   - Currency Crisis
-- Scenario CRUD operations (Create, Read, Update, Delete)
-- Scenario versioning and tagging
-- Integration with simulation engine
-- Scenario result storage and retrieval
+- AI-powered scenario generation from natural language (OpenAI / Anthropic)
+- Scenario CRUD operations, versioning, and tagging
 
-### Phase 4: Results Analysis and Visualization ✅
-- FastAPI REST API with comprehensive endpoints
-  - Simulation execution and comparison
-  - Scenario management (CRUD)
-  - Results retrieval and analysis
-- Interactive web dashboard
-  - Real-time system statistics
-  - Scenario browser
-  - Recent simulations display
+### API & Dashboard
+- FastAPI REST API with full Swagger/OpenAPI docs
+- Modern React dashboard (Vite + Tailwind CSS + Recharts)
+- Real-time analytics and system health monitoring
 - Export functionality (JSON, CSV)
-- API documentation (Swagger/OpenAPI)
 
-### Phase 5: Deployment and Integration ✅
+### Deployment
 - Docker containerization with multi-stage builds
 - Docker Compose orchestration (API, PostgreSQL, Nginx)
-- Production-ready configuration
-- Nginx reverse proxy with CORS support
 - GitHub Actions CI/CD pipeline
-- Comprehensive deployment documentation
-- Health checks and monitoring
-- Cloud deployment guides (AWS, GCP, Azure)
-
-### Big Upgrade: Intelligence & Aesthetics 🚀
-- **AI Scenario Generator**: Use LLMs (OpenAI/Anthropic) to generate complex scenarios from natural language.
-- **Portfolio Optimization**: Mean-Variance Optimization (MVO) engine for defensive rebalancing suggestions.
-- **Modern React Dashboard**: Built with Vite, React, Tailwind CSS, and Recharts for a premium enterprise experience.
-- **Real-time Analytics**: Interactive charts and system health monitoring.
+- Production-ready configuration with health checks
 
 ## Architecture
 
@@ -80,10 +59,16 @@ cross-asset-simulator/
 │   │   ├── validators.py    # Data validation
 │   │   ├── transformers.py  # Data transformation
 │   │   └── ingestion_service.py
+│   ├── scenarios/           # Scenario definitions and AI engine
+│   ├── simulation/          # Monte Carlo, historical sim, optimizer
+│   ├── api/                 # FastAPI routes and middleware
 │   └── tests/               # Unit tests
+├── frontend/                # React dashboard
+├── Dockerfile
+├── docker-compose.yml
+├── nginx.conf
 ├── requirements.txt
-├── .env.example
-└── init_database.py         # Database initialization script
+└── init_database.py
 ```
 
 ## Installation
@@ -124,7 +109,7 @@ Required environment variables:
 - `DATA_START_DATE`: Start date for historical data (default: 2019-01-01)
 - `DATA_END_DATE`: End date for historical data (default: 2024-12-31)
 
-### Get API Keys (Optional)
+### API Keys (Optional)
 
 **FRED API** (for economic indicators):
 1. Visit https://fred.stlouisfed.org/
@@ -134,86 +119,64 @@ Required environment variables:
 
 ## Usage
 
-### Initialize Database and Ingest Data
+### Initialize Database
 
 ```bash
 python init_database.py
 ```
 
-This will:
-1. Create database tables
-2. Fetch historical data for predefined assets
-3. Ingest economic indicators (if FRED API key is provided)
-4. Store all data in PostgreSQL
-
-### Run API Server and Dashboard
+### Run the API Server
 
 ```bash
-# Start the FastAPI server
 python run_api_server.py
 ```
 
-The API will be available at:
 - **API Base**: http://localhost:8000
 - **API Docs**: http://localhost:8000/docs (Swagger UI)
-- **Dashboard (Modern)**: Run `npm run dev` in `frontend/` and visit http://localhost:5173
-- **Classic Dashboard**: Open `frontend/index.html` in your browser (Legacy)
+- **React Dashboard**: Run `npm run dev` in `frontend/` → http://localhost:5173
 
-API Endpoints:
-- `POST /api/simulations/run` - Run simulations
-- `POST /api/simulations/optimize` - Portfolio optimization
-- `GET /api/scenarios/` - List scenarios
-- `POST /api/scenarios/generate-ai` - AI-driven scenario generation
-- `POST /api/scenarios/{id}/run` - Run scenario
-- `GET /api/analysis/results` - Get results
-- `GET /api/analysis/summary` - Get system summary
+### API Endpoints
 
-### Docker Deployment (Recommended)
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/simulations/run` | Run simulations |
+| POST | `/api/simulations/optimize` | Portfolio optimization |
+| GET | `/api/scenarios/` | List scenarios |
+| POST | `/api/scenarios/generate-ai` | AI scenario generation |
+| POST | `/api/scenarios/{id}/run` | Run a scenario |
+| GET | `/api/analysis/results` | Get results |
+| GET | `/api/analysis/summary` | System summary |
 
-**Quick Start:**
+### Docker Deployment
+
 ```bash
-# 1. Configure environment
+# Configure environment
 cp .env.production .env
-# Edit .env with your API keys
 
-# 2. Start all services
+# Start all services
 docker-compose up -d
 
-# 3. Initialize database
+# Initialize database
 docker-compose exec api python init_database.py
 
-# 4. Access the application
-# Dashboard: http://localhost
-# API Docs: http://localhost/docs
+# Access: http://localhost (Dashboard) | http://localhost/docs (API)
 ```
-
-**Services:**
-- **Nginx** (port 80): Frontend and reverse proxy
-- **API** (port 8000): FastAPI backend
-- **PostgreSQL** (port 5432): Database with TimescaleDB
-
-See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions.
 
 ### Asset Coverage
 
-**Equities**: SPY, QQQ, DIA, IWM, AAPL, MSFT, GOOGL, AMZN  
-**Bonds**: TLT, IEF, SHY, LQD, HYG  
-**Commodities**: GLD, SLV, USO, DBA  
-**Currencies**: EUR/USD, GBP/USD, JPY/USD, AUD/USD  
-
-**Economic Indicators**: Federal Funds Rate, Treasury Yields, CPI, GDP, Unemployment, VIX, and more
+**Equities**: SPY, QQQ, DIA, IWM, AAPL, MSFT, GOOGL, AMZN
+**Bonds**: TLT, IEF, SHY, LQD, HYG
+**Commodities**: GLD, SLV, USO, DBA
+**Currencies**: EUR/USD, GBP/USD, JPY/USD, AUD/USD
+**Economic Indicators**: Fed Funds Rate, Treasury Yields, CPI, GDP, Unemployment, VIX
 
 ### Run Tests
 
 ```bash
-# Run all tests
 pytest backend/tests/ -v
 
-# Run with coverage
+# With coverage
 pytest backend/tests/ --cov=backend --cov-report=html
-
-# Run specific test file
-pytest backend/tests/test_validators.py -v
 ```
 
 ## Development
@@ -221,60 +184,35 @@ pytest backend/tests/test_validators.py -v
 ### Code Quality
 
 ```bash
-# Format code
-black backend/
-
-# Lint code
-ruff check backend/
-
-# Type checking
-mypy backend/
+black backend/        # Format
+flake8 backend/       # Lint
+isort backend/        # Sort imports
+mypy backend/         # Type checking
 ```
 
 ### Database Management
 
 ```python
-from backend.database import db_manager
+from backend.database import get_db_manager
 
-# Create tables
+db_manager = get_db_manager()
 db_manager.create_tables()
 
-# Drop tables (caution!)
-db_manager.drop_tables()
-
-# Get a session
 with db_manager.get_session() as db:
-    # Your database operations
+    # your database operations
     pass
 ```
 
 ## Technology Stack
 
-- **Backend**: Python 3.11+, FastAPI
+- **Backend**: Python 3.11+, FastAPI, SQLAlchemy
+- **Frontend**: React, Vite, Tailwind CSS, Recharts
 - **Database**: PostgreSQL 14+
-- **Data Sources**: yfinance, FRED API
-- **Data Processing**: Pandas, NumPy, SciPy
-- **Testing**: pytest
-- **Code Quality**: ruff, black, mypy
-
-## Roadmap
-
-- [x] **Phase 1**: Data Ingestion and Preparation
-- [x] **Phase 2**: Core Simulation Engine
-- [x] **Phase 3**: Scenario Definition and Management
-- [x] **Phase 4**: Results Analysis and Visualization
-- [x] **Phase 5**: Deployment and Integration
-
-🎉 **All phases complete!** The Cross-Asset Stress Scenario Simulator is production-ready.
-
-## Contributing
-
-This is a phased implementation project. Each phase is completed and pushed to GitHub before proceeding to the next phase.
+- **Data**: yfinance, FRED API, Pandas, NumPy, SciPy
+- **AI**: OpenAI / Anthropic (optional, for scenario generation)
+- **Deployment**: Docker, Nginx, GitHub Actions
+- **Testing**: pytest, flake8, black, isort
 
 ## License
 
 MIT License
-
-## Contact
-
-For questions or issues, please open a GitHub issue.
