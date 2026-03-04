@@ -1,11 +1,12 @@
 """Database connection and session management."""
 
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
-from sqlalchemy.pool import QueuePool
+import logging
 from contextlib import contextmanager
 from typing import Generator
-import logging
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.pool import QueuePool
 
 from backend.config import settings
 from backend.database.models import Base
@@ -18,7 +19,7 @@ class DatabaseManager:
 
     def __init__(self, database_url: str = None):
         """Initialize database manager.
-        
+
         Args:
             database_url: Database connection URL. If None, uses settings.
         """
@@ -32,9 +33,7 @@ class DatabaseManager:
             pool_pre_ping=True,  # Verify connections before using
         )
         self.SessionLocal = sessionmaker(
-            autocommit=False,
-            autoflush=False,
-            bind=self.engine
+            autocommit=False, autoflush=False, bind=self.engine
         )
 
     def create_tables(self):
@@ -52,7 +51,7 @@ class DatabaseManager:
     @contextmanager
     def get_session(self) -> Generator[Session, None, None]:
         """Get a database session with automatic cleanup.
-        
+
         Yields:
             SQLAlchemy Session object
         """
@@ -68,15 +67,23 @@ class DatabaseManager:
             session.close()
 
 
-# Global database manager instance
-db_manager = DatabaseManager()
+# Global database manager instance (lazy initialization)
+_db_manager = None
+
+
+def get_db_manager() -> DatabaseManager:
+    """Get or create the global database manager instance."""
+    global _db_manager
+    if _db_manager is None:
+        _db_manager = DatabaseManager()
+    return _db_manager
 
 
 def get_db() -> Generator[Session, None, None]:
     """Dependency for FastAPI to get database sessions.
-    
+
     Yields:
         SQLAlchemy Session object
     """
-    with db_manager.get_session() as session:
+    with get_db_manager().get_session() as session:
         yield session

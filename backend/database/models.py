@@ -1,8 +1,9 @@
 """Database models for the Cross-Asset Stress Scenario Simulator."""
 
-from sqlalchemy import Column, Integer, String, Float, DateTime, Index
-from sqlalchemy.ext.declarative import declarative_base
 from datetime import datetime
+
+from sqlalchemy import Column, DateTime, Float, Index, Integer, String
+from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()
 
@@ -14,7 +15,9 @@ class AssetPrice(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     ticker = Column(String(20), nullable=False, index=True)
-    asset_class = Column(String(50), nullable=False, index=True)  # equity, bond, commodity, currency
+    asset_class = Column(
+        String(50), nullable=False, index=True
+    )  # equity, bond, commodity, currency
     date = Column(DateTime, nullable=False, index=True)
     open = Column(Float)
     high = Column(Float)
@@ -30,7 +33,9 @@ class AssetPrice(Base):
     )
 
     def __repr__(self):
-        return f"<AssetPrice(ticker={self.ticker}, date={self.date}, close={self.close})>"
+        return (
+            f"<AssetPrice(ticker={self.ticker}, date={self.date}, close={self.close})>"
+        )
 
 
 class EconomicIndicator(Base):
@@ -46,9 +51,7 @@ class EconomicIndicator(Base):
     frequency = Column(String(20))  # daily, monthly, quarterly, annual
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    __table_args__ = (
-        Index("idx_indicator_date", "indicator_code", "date"),
-    )
+    __table_args__ = (Index("idx_indicator_date", "indicator_code", "date"),)
 
     def __repr__(self):
         return f"<EconomicIndicator(code={self.indicator_code}, date={self.date}, value={self.value})>"

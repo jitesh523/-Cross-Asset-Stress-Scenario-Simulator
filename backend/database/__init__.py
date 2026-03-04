@@ -1,7 +1,7 @@
 """Database module."""
 
-from .models import Base, AssetPrice, EconomicIndicator, AssetMetadata
-from .connection import DatabaseManager, db_manager, get_db
+from .connection import DatabaseManager, get_db, get_db_manager
+from .models import AssetMetadata, AssetPrice, Base, EconomicIndicator
 
 __all__ = [
     "Base",
@@ -9,6 +9,6 @@ __all__ = [
     "EconomicIndicator",
     "AssetMetadata",
     "DatabaseManager",
-    "db_manager",
+    "get_db_manager",
     "get_db",
 ]

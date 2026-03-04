@@ -1,15 +1,16 @@
 """FastAPI main application."""
 
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import logging
 
 from backend.config import settings
 
 # Configure logging
 logging.basicConfig(
     level=getattr(logging, settings.log_level),
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 
 logger = logging.getLogger(__name__)
@@ -19,7 +20,7 @@ app = FastAPI(
     title=settings.app_name,
     description="API for Cross-Asset Stress Scenario Simulator",
     version="1.0.0",
-    debug=settings.debug
+    debug=settings.debug,
 )
 
 # Configure CORS
@@ -38,7 +39,7 @@ async def root():
     return {
         "message": "Cross-Asset Stress Scenario Simulator API",
         "version": "1.0.0",
-        "status": "running"
+        "status": "running",
     }
 
 
@@ -49,7 +50,7 @@ async def health_check():
 
 
 # Import routers
-from backend.api.routes import simulation, scenarios, analysis
+from backend.api.routes import analysis, scenarios, simulation  # noqa: E402
 
 # Include routers
 app.include_router(simulation.router, prefix="/api/simulations", tags=["simulations"])
@@ -59,4 +60,5 @@ app.include_router(analysis.router, prefix="/api/analysis", tags=["analysis"])
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

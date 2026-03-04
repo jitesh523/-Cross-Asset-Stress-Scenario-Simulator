@@ -1,22 +1,22 @@
 """Application configuration settings."""
 
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing import Optional
 from datetime import datetime
+from typing import Optional
+
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
     model_config = SettingsConfigDict(
-        env_file=".env",
-        env_file_encoding="utf-8",
-        case_sensitive=False,
-        extra="ignore"
+        env_file=".env", env_file_encoding="utf-8", case_sensitive=False, extra="ignore"
     )
 
     # Database
-    database_url: str = "postgresql://user:password@localhost:5432/cross_asset_simulator"
+    database_url: str = (
+        "postgresql://user:password@localhost:5432/cross_asset_simulator"
+    )
     db_echo: bool = False
 
     # API Keys
