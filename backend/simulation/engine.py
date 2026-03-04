@@ -320,9 +320,9 @@ class SimulationEngine:
                         corr_matrix[i, j] = np.clip(corr_matrix[i, j], -0.99, 0.99)
 
             # Make matrix positive definite if needed
-            data[
-                "correlation_matrix"
-            ] = self.correlation_calculator._make_positive_definite(corr_matrix)
+            data["correlation_matrix"] = (
+                self.correlation_calculator._make_positive_definite(corr_matrix)
+            )
             logger.info(f"Applied correlation multiplier of {multiplier:.2f}")
 
         return data

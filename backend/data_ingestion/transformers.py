@@ -64,9 +64,9 @@ class DataTransformer:
         df = df.copy()
 
         if method == "ffill":
-            df = df.fillna(method="ffill", limit=limit)
+            df = df.ffill(limit=limit)
         elif method == "bfill":
-            df = df.fillna(method="bfill", limit=limit)
+            df = df.bfill(limit=limit)
         elif method == "interpolate":
             df = df.interpolate(method="linear", limit=limit)
         elif method == "drop":

@@ -23,9 +23,7 @@ def test_ai_engine_init():
 def test_generate_scenario_params_openai():
     """Test scenario generation using OpenAI mock."""
     mock_response = MagicMock()
-    mock_response.choices[
-        0
-    ].message.content = """
+    mock_response.choices[0].message.content = """
     {
         "name": "Tech Crash",
         "description": "Massive tech sell-off",
@@ -55,9 +53,7 @@ def test_generate_scenario_params_openai():
 def test_generate_scenario_params_anthropic():
     """Test scenario generation using Anthropic mock."""
     mock_response = MagicMock()
-    mock_response.content = [
-        MagicMock(
-            text="""
+    mock_response.content = [MagicMock(text="""
     {
         "name": "Rate Hike",
         "description": "Fed raises rates",
@@ -69,9 +65,7 @@ def test_generate_scenario_params_anthropic():
         },
         "tags": ["rates"]
     }
-    """
-        )
-    ]
+    """)]
 
     with patch("backend.scenarios.ai_engine.Anthropic") as mock_anthropic:
         mock_client = mock_anthropic.return_value
