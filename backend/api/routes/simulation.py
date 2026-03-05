@@ -11,6 +11,7 @@ from backend.database import get_db
 from backend.simulation.engine import SimulationEngine
 from backend.simulation.hedging_service import HedgingService
 from backend.simulation.optimizer import PortfolioOptimizer
+from backend.simulation.report_generator import StressTestReport
 
 logger = logging.getLogger(__name__)
 
@@ -183,4 +184,54 @@ async def optimize_portfolio(
 
     except Exception as e:
         logger.error(f"Optimization failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class ReportRequest(BaseModel):
+    """Request model for stress test report."""
+
+    tickers: List[str]
+    start_date: str
+    end_date: str
+    scenario_name: str = "Custom Scenario"
+    num_simulations: int = 1000
+    num_days: int = 252
+    scenario_adjustments: Optional[dict] = None
+
+
+@router.post("/report")
+async def generate_report(request: ReportRequest, db: Session = Depends(get_db)):
+    """Run a simulation and generate a stress test report.
+
+    Args:
+        request: Report parameters
+        db: Database session
+
+    Returns:
+        Structured stress test report
+    """
+    try:
+        engine = SimulationEngine(db)
+
+        results = engine.run_simulation(
+            method="monte_carlo",
+            tickers=request.tickers,
+            start_date=request.start_date,
+            end_date=request.end_date,
+            num_simulations=request.num_simulations,
+            num_days=request.num_days,
+            scenario_adjustments=request.scenario_adjustments,
+        )
+
+        report = StressTestReport(
+            simulation_stats=results["statistics"].to_dict("records"),
+            var_metrics=results["var_metrics"],
+            scenario_name=request.scenario_name,
+            parameters=results["parameters"],
+        )
+
+        return report.generate()
+
+    except Exception as e:
+        logger.error(f"Report generation failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
