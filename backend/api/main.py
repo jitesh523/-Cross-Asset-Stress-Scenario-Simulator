@@ -1,6 +1,8 @@
 """FastAPI main application."""
 
 import logging
+import sys
+import time
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,6 +16,8 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
+
+_start_time = time.time()
 
 # Create FastAPI app
 app = FastAPI(
@@ -45,8 +49,34 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint."""
-    return {"status": "healthy"}
+    """Health check endpoint with uptime."""
+    uptime_seconds = time.time() - _start_time
+    return {
+        "status": "healthy",
+        "uptime_seconds": round(uptime_seconds, 1),
+    }
+
+
+@app.get("/version")
+async def version_info():
+    """Version and environment details."""
+    return {
+        "version": "1.0.0",
+        "python": sys.version.split()[0],
+        "modules": [
+            "monte_carlo",
+            "historical_simulation",
+            "correlation_matrix",
+            "risk_metrics",
+            "risk_decomposition",
+            "regime_detector",
+            "report_generator",
+            "scenario_comparator",
+            "backtester",
+            "optimizer",
+            "hedging_service",
+        ],
+    }
 
 
 # Import routers
