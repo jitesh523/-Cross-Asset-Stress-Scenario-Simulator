@@ -19,9 +19,7 @@ class HedgingService:
         self.tickers = tickers
         self.initial_total_value = initial_total_value
 
-    def calculate_trades(
-        self, current_weights: Dict[str, float], target_weights: Dict[str, float]
-    ) -> List[Dict]:
+    def calculate_trades(self, current_weights: Dict[str, float], target_weights: Dict[str, float]) -> List[Dict]:
         """Calculate necessary trades to go from current to target weights.
 
         Args:

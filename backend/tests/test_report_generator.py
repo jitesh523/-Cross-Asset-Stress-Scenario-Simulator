@@ -81,9 +81,7 @@ class TestReportGeneration:
 
     def test_executive_summary_fields(self):
         """Executive summary should have all key metrics."""
-        summary = StressTestReport(_make_stats(), _make_var()).generate()[
-            "executive_summary"
-        ]
+        summary = StressTestReport(_make_stats(), _make_var()).generate()["executive_summary"]
 
         assert "portfolio_var_95" in summary
         assert "portfolio_cvar_95" in summary
@@ -108,7 +106,5 @@ class TestReportGeneration:
 
     def test_custom_scenario_name(self):
         """Custom scenario name should appear in report."""
-        report = StressTestReport(
-            _make_stats(), _make_var(), scenario_name="2008 Crisis"
-        ).generate()
+        report = StressTestReport(_make_stats(), _make_var(), scenario_name="2008 Crisis").generate()
         assert report["scenario"] == "2008 Crisis"

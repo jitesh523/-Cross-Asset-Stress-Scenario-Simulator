@@ -15,9 +15,7 @@ logger = logging.getLogger(__name__)
 class HistoricalSimulation:
     """Historical simulation using bootstrap resampling of historical returns."""
 
-    def __init__(
-        self, historical_returns: pd.DataFrame, initial_prices: Dict[str, float]
-    ):
+    def __init__(self, historical_returns: pd.DataFrame, initial_prices: Dict[str, float]):
         """Initialize historical simulation.
 
         Args:
@@ -28,9 +26,7 @@ class HistoricalSimulation:
         self.tickers = list(historical_returns.columns)
         self.initial_prices = np.array([initial_prices[t] for t in self.tickers])
 
-        logger.info(
-            f"Initialized historical simulation with {len(historical_returns)} historical periods"
-        )
+        logger.info(f"Initialized historical simulation with {len(historical_returns)} historical periods")
 
     @classmethod
     def from_database(
@@ -70,12 +66,7 @@ class HistoricalSimulation:
 
             data = query.all()
             if data:
-                df = pd.DataFrame(
-                    [
-                        {"date": d.date, "close": d.close, "ticker": d.ticker}
-                        for d in data
-                    ]
-                )
+                df = pd.DataFrame([{"date": d.date, "close": d.close, "ticker": d.ticker} for d in data])
                 all_data.append(df)
 
         if not all_data:
@@ -116,9 +107,7 @@ class HistoricalSimulation:
         if random_seed is not None:
             np.random.seed(random_seed)
 
-        logger.info(
-            f"Running {num_simulations} historical simulations for {num_days} days"
-        )
+        logger.info(f"Running {num_simulations} historical simulations for {num_days} days")
 
         num_assets = len(self.tickers)
         num_historical_periods = len(self.historical_returns)
@@ -134,17 +123,13 @@ class HistoricalSimulation:
             # Standard bootstrap: sample individual days
             for sim in range(num_simulations):
                 # Randomly sample days from historical returns
-                sampled_indices = np.random.randint(
-                    0, num_historical_periods, size=num_days
-                )
+                sampled_indices = np.random.randint(0, num_historical_periods, size=num_days)
                 sampled_returns = self.historical_returns.iloc[sampled_indices].values.T
                 simulated_returns[:, sim, :] = sampled_returns
         else:
             # Block bootstrap: sample blocks of consecutive days
             for sim in range(num_simulations):
-                sampled_returns = self._block_bootstrap(
-                    num_days, block_size, num_historical_periods
-                )
+                sampled_returns = self._block_bootstrap(num_days, block_size, num_historical_periods)
                 simulated_returns[:, sim, :] = sampled_returns
 
         # Calculate price paths from returns
@@ -161,9 +146,7 @@ class HistoricalSimulation:
         logger.info("Historical simulation completed")
         return results
 
-    def _block_bootstrap(
-        self, num_days: int, block_size: int, num_historical_periods: int
-    ) -> np.ndarray:
+    def _block_bootstrap(self, num_days: int, block_size: int, num_historical_periods: int) -> np.ndarray:
         """Perform block bootstrap resampling.
 
         Args:
@@ -186,9 +169,7 @@ class HistoricalSimulation:
                 block = self.historical_returns.iloc[start_idx : start_idx + 1].values.T
             else:
                 start_idx = np.random.randint(0, max_start)
-                block = self.historical_returns.iloc[
-                    start_idx : start_idx + block_size
-                ].values.T
+                block = self.historical_returns.iloc[start_idx : start_idx + block_size].values.T
 
             sampled_returns.append(block)
             days_sampled += block.shape[1]
@@ -223,11 +204,8 @@ class HistoricalSimulation:
                 "max_final_price": np.max(final_prices_asset),
                 "percentile_5": np.percentile(final_prices_asset, 5),
                 "percentile_95": np.percentile(final_prices_asset, 95),
-                "mean_return": (np.mean(final_prices_asset) - self.initial_prices[i])
-                / self.initial_prices[i],
-                "probability_loss": np.mean(
-                    final_prices_asset < self.initial_prices[i]
-                ),
+                "mean_return": (np.mean(final_prices_asset) - self.initial_prices[i]) / self.initial_prices[i],
+                "probability_loss": np.mean(final_prices_asset < self.initial_prices[i]),
             }
             stats_list.append(stats)
 
@@ -258,17 +236,14 @@ class HistoricalSimulation:
         # Portfolio value for each simulation
         portfolio_values = (
             np.sum(
-                (final_prices / self.initial_prices[:, np.newaxis])
-                * (weight_per_asset / num_assets),
+                (final_prices / self.initial_prices[:, np.newaxis]) * (weight_per_asset / num_assets),
                 axis=0,
             )
             * num_assets
         )
 
         # Calculate returns
-        portfolio_returns = (
-            portfolio_values - initial_portfolio_value
-        ) / initial_portfolio_value
+        portfolio_returns = (portfolio_values - initial_portfolio_value) / initial_portfolio_value
 
         # VaR calculation
         var_percentile = (1 - confidence_level) * 100

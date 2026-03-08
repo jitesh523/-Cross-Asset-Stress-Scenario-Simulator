@@ -34,9 +34,7 @@ class AIScenarioEngine:
         else:
             raise ValueError(f"Unsupported AI provider: {provider}")
 
-    def generate_scenario_params(
-        self, prompt: str, available_assets: List[str]
-    ) -> Dict:
+    def generate_scenario_params(self, prompt: str, available_assets: List[str]) -> Dict:
         """Generate scenario parameters from a natural language prompt.
 
         Args:
@@ -47,9 +45,7 @@ class AIScenarioEngine:
             Dictionary with scenario name, description, category, and parameters
         """
         if not self.client:
-            raise ValueError(
-                f"AI client for {self.provider} not initialized. MISSING API KEY."
-            )
+            raise ValueError(f"AI client for {self.provider} not initialized. MISSING API KEY.")
 
         system_prompt = (
             "You are a financial risk expert specializing in stress testing "

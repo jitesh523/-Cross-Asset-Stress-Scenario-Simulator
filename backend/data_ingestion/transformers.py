@@ -48,9 +48,7 @@ class DataTransformer:
         return df
 
     @staticmethod
-    def handle_missing_values(
-        df: pd.DataFrame, method: str = "ffill", limit: Optional[int] = None
-    ) -> pd.DataFrame:
+    def handle_missing_values(df: pd.DataFrame, method: str = "ffill", limit: Optional[int] = None) -> pd.DataFrame:
         """Handle missing values in DataFrame.
 
         Args:
@@ -79,9 +77,7 @@ class DataTransformer:
         return df
 
     @staticmethod
-    def normalize_data(
-        df: pd.DataFrame, columns: list, method: str = "zscore"
-    ) -> pd.DataFrame:
+    def normalize_data(df: pd.DataFrame, columns: list, method: str = "zscore") -> pd.DataFrame:
         """Normalize data columns.
 
         Args:
@@ -102,9 +98,7 @@ class DataTransformer:
             if method == "zscore":
                 df[f"{col}_normalized"] = (df[col] - df[col].mean()) / df[col].std()
             elif method == "minmax":
-                df[f"{col}_normalized"] = (df[col] - df[col].min()) / (
-                    df[col].max() - df[col].min()
-                )
+                df[f"{col}_normalized"] = (df[col] - df[col].min()) / (df[col].max() - df[col].min())
             elif method == "robust":
                 median = df[col].median()
                 q75, q25 = df[col].quantile([0.75, 0.25])

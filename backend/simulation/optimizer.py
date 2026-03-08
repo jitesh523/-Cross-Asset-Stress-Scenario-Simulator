@@ -36,9 +36,7 @@ class PortfolioOptimizer:
 
         self.num_assets = len(self.tickers)
 
-    def portfolio_performance(
-        self, weights: np.ndarray
-    ) -> Tuple[float, float, float, float]:
+    def portfolio_performance(self, weights: np.ndarray) -> Tuple[float, float, float, float]:
         """Calculate portfolio annual return, volatility, Sharpe ratio and Expected Shortfall.
 
         Args:

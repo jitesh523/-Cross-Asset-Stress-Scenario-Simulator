@@ -28,9 +28,7 @@ class FREDConnector:
         else:
             self.fred = Fred(api_key=self.api_key)
 
-    def fetch_series(
-        self, series_id: str, start_date: datetime, end_date: datetime
-    ) -> Optional[pd.DataFrame]:
+    def fetch_series(self, series_id: str, start_date: datetime, end_date: datetime) -> Optional[pd.DataFrame]:
         """Fetch a single economic indicator series.
 
         Args:
@@ -46,13 +44,9 @@ class FREDConnector:
             return None
 
         try:
-            logger.info(
-                f"Fetching FRED series {series_id} from {start_date} to {end_date}"
-            )
+            logger.info(f"Fetching FRED series {series_id} from {start_date} to {end_date}")
 
-            series = self.fred.get_series(
-                series_id, observation_start=start_date, observation_end=end_date
-            )
+            series = self.fred.get_series(series_id, observation_start=start_date, observation_end=end_date)
 
             if series.empty:
                 logger.warning(f"No data found for series {series_id}")
@@ -79,9 +73,7 @@ class FREDConnector:
             logger.error(f"Error fetching FRED series {series_id}: {e}")
             return None
 
-    def fetch_multiple_series(
-        self, series_ids: List[str], start_date: datetime, end_date: datetime
-    ) -> pd.DataFrame:
+    def fetch_multiple_series(self, series_ids: List[str], start_date: datetime, end_date: datetime) -> pd.DataFrame:
         """Fetch multiple economic indicator series.
 
         Args:
@@ -104,9 +96,7 @@ class FREDConnector:
             return pd.DataFrame()
 
         combined_df = pd.concat(all_data, ignore_index=True)
-        logger.info(
-            f"Fetched total {len(combined_df)} records for {len(all_data)} series"
-        )
+        logger.info(f"Fetched total {len(combined_df)} records for {len(all_data)} series")
 
         return combined_df
 

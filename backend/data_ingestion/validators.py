@@ -13,9 +13,7 @@ class DataValidator:
     """Validates data quality and consistency."""
 
     @staticmethod
-    def check_missing_values(
-        df: pd.DataFrame, threshold: float = 0.3
-    ) -> Tuple[bool, List[str]]:
+    def check_missing_values(df: pd.DataFrame, threshold: float = 0.3) -> Tuple[bool, List[str]]:
         """Check for missing values in DataFrame.
 
         Args:
@@ -29,17 +27,13 @@ class DataValidator:
         problematic_cols = missing_ratio[missing_ratio > threshold].index.tolist()
 
         if problematic_cols:
-            logger.warning(
-                f"Columns with >{threshold*100}% missing values: {problematic_cols}"
-            )
+            logger.warning(f"Columns with >{threshold*100}% missing values: {problematic_cols}")
             return False, problematic_cols
 
         return True, []
 
     @staticmethod
-    def check_duplicates(
-        df: pd.DataFrame, subset: List[str] = None
-    ) -> Tuple[bool, int]:
+    def check_duplicates(df: pd.DataFrame, subset: List[str] = None) -> Tuple[bool, int]:
         """Check for duplicate rows.
 
         Args:
@@ -58,9 +52,7 @@ class DataValidator:
         return True, 0
 
     @staticmethod
-    def check_date_continuity(
-        df: pd.DataFrame, date_column: str = "date"
-    ) -> Tuple[bool, List]:
+    def check_date_continuity(df: pd.DataFrame, date_column: str = "date") -> Tuple[bool, List]:
         """Check for gaps in date series.
 
         Args:
@@ -126,9 +118,7 @@ class DataValidator:
 
         outlier_count = outliers.sum()
         if outlier_count > 0:
-            logger.info(
-                f"Found {outlier_count} outliers in '{column}' using {method} method"
-            )
+            logger.info(f"Found {outlier_count} outliers in '{column}' using {method} method")
             return False, outliers
 
         return True, outliers

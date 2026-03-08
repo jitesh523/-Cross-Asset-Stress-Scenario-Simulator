@@ -18,9 +18,7 @@ class CorrelationMatrix:
         self.correlation_matrix = None
         self.tickers = []
 
-    def calculate_from_returns(
-        self, returns_df: pd.DataFrame, method: str = "pearson"
-    ) -> pd.DataFrame:
+    def calculate_from_returns(self, returns_df: pd.DataFrame, method: str = "pearson") -> pd.DataFrame:
         """Calculate correlation matrix from returns data.
 
         Args:
@@ -30,9 +28,7 @@ class CorrelationMatrix:
         Returns:
             Correlation matrix as DataFrame
         """
-        logger.info(
-            f"Calculating {method} correlation matrix for {len(returns_df.columns)} assets"
-        )
+        logger.info(f"Calculating {method} correlation matrix for {len(returns_df.columns)} assets")
 
         # Calculate correlation
         corr_matrix = returns_df.corr(method=method)
@@ -82,12 +78,7 @@ class CorrelationMatrix:
 
             data = query.all()
             if data:
-                df = pd.DataFrame(
-                    [
-                        {"date": d.date, "close": d.close, "ticker": d.ticker}
-                        for d in data
-                    ]
-                )
+                df = pd.DataFrame([{"date": d.date, "close": d.close, "ticker": d.ticker} for d in data])
                 all_data.append(df)
 
         if not all_data:
@@ -122,19 +113,13 @@ class CorrelationMatrix:
             logger.info("Cholesky decomposition calculated successfully")
             return cholesky
         except np.linalg.LinAlgError:
-            logger.warning(
-                "Correlation matrix is not positive definite, using eigenvalue adjustment"
-            )
+            logger.warning("Correlation matrix is not positive definite, using eigenvalue adjustment")
             # Adjust matrix to be positive definite
-            adjusted_matrix = self._make_positive_definite(
-                self.correlation_matrix.values
-            )
+            adjusted_matrix = self._make_positive_definite(self.correlation_matrix.values)
             cholesky = np.linalg.cholesky(adjusted_matrix)
             return cholesky
 
-    def _make_positive_definite(
-        self, matrix: np.ndarray, epsilon: float = 1e-6
-    ) -> np.ndarray:
+    def _make_positive_definite(self, matrix: np.ndarray, epsilon: float = 1e-6) -> np.ndarray:
         """Make a matrix positive definite by adjusting eigenvalues.
 
         Args:

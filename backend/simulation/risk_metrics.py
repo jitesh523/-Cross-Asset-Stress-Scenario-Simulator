@@ -54,9 +54,7 @@ class RiskMetrics:
         return float(mean_excess / downside_std * np.sqrt(annualization_factor))
 
     @staticmethod
-    def calmar_ratio(
-        returns: np.ndarray, prices: np.ndarray, annualization_factor: float = 252.0
-    ) -> float:
+    def calmar_ratio(returns: np.ndarray, prices: np.ndarray, annualization_factor: float = 252.0) -> float:
         """Calculate Calmar ratio (annualized return / max drawdown).
 
         Args:

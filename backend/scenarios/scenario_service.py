@@ -122,9 +122,7 @@ class ScenarioService:
 
         # Filter by tags if provided
         if tags:
-            scenarios = [
-                s for s in scenarios if s.tags and any(tag in s.tags for tag in tags)
-            ]
+            scenarios = [s for s in scenarios if s.tags and any(tag in s.tags for tag in tags)]
 
         return scenarios
 
@@ -202,9 +200,7 @@ class ScenarioService:
             # Check if already exists
             existing = self.get_scenario_by_name(scenario_dict["name"])
             if existing:
-                logger.info(
-                    f"Scenario '{scenario_dict['name']}' already exists, skipping"
-                )
+                logger.info(f"Scenario '{scenario_dict['name']}' already exists, skipping")
                 continue
 
             scenario = Scenario(
@@ -310,9 +306,7 @@ class ScenarioService:
             "execution_time": execution_time,
         }
 
-    def get_scenario_results(
-        self, scenario_id: Optional[int] = None, limit: int = 10
-    ) -> List[ScenarioResult]:
+    def get_scenario_results(self, scenario_id: Optional[int] = None, limit: int = 10) -> List[ScenarioResult]:
         """Get scenario simulation results.
 
         Args:

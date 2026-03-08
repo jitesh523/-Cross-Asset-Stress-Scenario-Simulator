@@ -23,9 +23,7 @@ class ResultsQuery(BaseModel):
 
 
 @router.get("/results")
-async def get_results(
-    scenario_id: int = None, limit: int = 10, db: Session = Depends(get_db)
-):
+async def get_results(scenario_id: int = None, limit: int = 10, db: Session = Depends(get_db)):
     """Get scenario simulation results.
 
     Args:
@@ -63,9 +61,7 @@ async def get_results(
 
 
 @router.get("/export/{result_id}")
-async def export_results(
-    result_id: int, format: str = "json", db: Session = Depends(get_db)
-):
+async def export_results(result_id: int, format: str = "json", db: Session = Depends(get_db)):
     """Export simulation results in various formats.
 
     Args:
@@ -139,9 +135,7 @@ async def get_summary(db: Session = Depends(get_db)):
         # Group by category
         for scenario in scenarios:
             cat = scenario.category
-            summary["scenarios_by_category"][cat] = (
-                summary["scenarios_by_category"].get(cat, 0) + 1
-            )
+            summary["scenarios_by_category"][cat] = summary["scenarios_by_category"].get(cat, 0) + 1
 
         return summary
 

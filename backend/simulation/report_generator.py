@@ -157,8 +157,5 @@ class StressTestReport:
             "recommended_actions": self._recommended_actions(overall_rating),
         }
 
-        logger.info(
-            f"Generated stress test report for '{self.scenario_name}' "
-            f"— overall rating: {overall_rating}"
-        )
+        logger.info(f"Generated stress test report for '{self.scenario_name}' " f"— overall rating: {overall_rating}")
         return report

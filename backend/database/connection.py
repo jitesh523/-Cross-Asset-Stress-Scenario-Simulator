@@ -32,9 +32,7 @@ class DatabaseManager:
             max_overflow=10,
             pool_pre_ping=True,  # Verify connections before using
         )
-        self.SessionLocal = sessionmaker(
-            autocommit=False, autoflush=False, bind=self.engine
-        )
+        self.SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=self.engine)
 
     def create_tables(self):
         """Create all tables in the database."""

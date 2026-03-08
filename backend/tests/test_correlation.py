@@ -34,9 +34,7 @@ class TestCorrelationMatrix:
     def test_get_cholesky_decomposition(self):
         """Test Cholesky decomposition."""
         # Create a simple correlation matrix
-        returns_df = pd.DataFrame(
-            {"A": [0.01, 0.02, -0.01, 0.03], "B": [0.02, 0.01, -0.02, 0.02]}
-        )
+        returns_df = pd.DataFrame({"A": [0.01, 0.02, -0.01, 0.03], "B": [0.02, 0.01, -0.02, 0.02]})
 
         corr_calc = CorrelationMatrix()
         corr_calc.calculate_from_returns(returns_df)
@@ -44,9 +42,7 @@ class TestCorrelationMatrix:
 
         # Verify L @ L.T = correlation matrix
         reconstructed = cholesky @ cholesky.T
-        assert np.allclose(
-            reconstructed, corr_calc.correlation_matrix.values, atol=1e-10
-        )
+        assert np.allclose(reconstructed, corr_calc.correlation_matrix.values, atol=1e-10)
 
     def test_make_positive_definite(self):
         """Test making a matrix positive definite."""
@@ -65,9 +61,7 @@ class TestCorrelationMatrix:
 
     def test_get_correlation(self):
         """Test getting correlation between two assets."""
-        returns_df = pd.DataFrame(
-            {"AAPL": [0.01, 0.02, -0.01], "MSFT": [0.02, 0.01, -0.02]}
-        )
+        returns_df = pd.DataFrame({"AAPL": [0.01, 0.02, -0.01], "MSFT": [0.02, 0.01, -0.02]})
 
         corr_calc = CorrelationMatrix()
         corr_calc.calculate_from_returns(returns_df)
