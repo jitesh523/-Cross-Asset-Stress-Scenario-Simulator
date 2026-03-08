@@ -66,9 +66,7 @@ class TestPredefinedScenarios:
         assert scenario["category"] == "volatility_spike"
 
         # Check high volatility multipliers
-        assert all(
-            v >= 1.9 for v in scenario["parameters"]["volatility_multipliers"].values()
-        )
+        assert all(v >= 1.9 for v in scenario["parameters"]["volatility_multipliers"].values())
 
     def test_get_currency_crisis(self):
         """Test currency crisis scenario."""
@@ -116,9 +114,7 @@ class TestPredefinedScenarios:
 
         for scenario in scenarios:
             for field in required_fields:
-                assert (
-                    field in scenario
-                ), f"Scenario '{scenario.get('name')}' missing field '{field}'"
+                assert field in scenario, f"Scenario '{scenario.get('name')}' missing field '{field}'"
 
             # Check parameters structure
             assert (

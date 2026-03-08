@@ -33,9 +33,7 @@ class MonteCarloSimulation:
         self.volatilities = np.array([volatilities[t] for t in self.tickers])
         self.correlation_matrix = correlation_matrix
 
-        logger.info(
-            f"Initialized Monte Carlo simulation for {len(self.tickers)} assets"
-        )
+        logger.info(f"Initialized Monte Carlo simulation for {len(self.tickers)} assets")
 
     def simulate(
         self,
@@ -60,9 +58,7 @@ class MonteCarloSimulation:
         if random_seed is not None:
             np.random.seed(random_seed)
 
-        logger.info(
-            f"Running {num_simulations} simulations for {num_days} days (Regime-Aware: {regime_aware})"
-        )
+        logger.info(f"Running {num_simulations} simulations for {num_days} days (Regime-Aware: {regime_aware})")
 
         num_assets = len(self.tickers)
 
@@ -84,9 +80,7 @@ class MonteCarloSimulation:
                     for j in range(n):
                         if i != j:
                             # Push correlations 30% closer to 1.0
-                            stress_corr[i, j] = (
-                                stress_corr[i, j] + (1.0 - stress_corr[i, j]) * 0.3
-                            )
+                            stress_corr[i, j] = stress_corr[i, j] + (1.0 - stress_corr[i, j]) * 0.3
 
                 # Ensure positive definite
                 from backend.simulation.utils import make_positive_definite
@@ -120,20 +114,13 @@ class MonteCarloSimulation:
                         stress_mask = avg_prev_returns < -0.015
 
                         # Apply appropriate Cholesky
-                        shocks[:, ~stress_mask] = (
-                            base_cholesky @ independent_shocks[:, ~stress_mask]
-                        )
-                        shocks[:, stress_mask] = (
-                            stress_cholesky @ independent_shocks[:, stress_mask]
-                        )
+                        shocks[:, ~stress_mask] = base_cholesky @ independent_shocks[:, ~stress_mask]
+                        shocks[:, stress_mask] = stress_cholesky @ independent_shocks[:, stress_mask]
             else:
                 shocks = independent_shocks
 
             # Apply Geometric Brownian Motion step
-            drift = (
-                self.expected_returns[:, np.newaxis]
-                - 0.5 * self.volatilities[:, np.newaxis] ** 2
-            ) * dt
+            drift = (self.expected_returns[:, np.newaxis] - 0.5 * self.volatilities[:, np.newaxis] ** 2) * dt
             diffusion = self.volatilities[:, np.newaxis] * np.sqrt(dt) * shocks
 
             prices[:, :, t + 1] = prices[:, :, t] * np.exp(drift + diffusion)
@@ -166,9 +153,7 @@ class MonteCarloSimulation:
             Correlated random shocks
         """
         # Generate independent standard normal variables
-        independent_shocks = np.random.normal(
-            0, 1, (num_assets, num_simulations, num_days)
-        )
+        independent_shocks = np.random.normal(0, 1, (num_assets, num_simulations, num_days))
 
         # Apply Cholesky transformation for each time step
         correlated_shocks = np.zeros_like(independent_shocks)
@@ -203,19 +188,14 @@ class MonteCarloSimulation:
                 "max_final_price": np.max(final_prices_asset),
                 "percentile_5": np.percentile(final_prices_asset, 5),
                 "percentile_95": np.percentile(final_prices_asset, 95),
-                "mean_return": (np.mean(final_prices_asset) - self.initial_prices[i])
-                / self.initial_prices[i],
-                "probability_loss": np.mean(
-                    final_prices_asset < self.initial_prices[i]
-                ),
+                "mean_return": (np.mean(final_prices_asset) - self.initial_prices[i]) / self.initial_prices[i],
+                "probability_loss": np.mean(final_prices_asset < self.initial_prices[i]),
             }
             stats_list.append(stats)
 
         return pd.DataFrame(stats_list)
 
-    def get_price_paths_df(
-        self, results: Dict, num_paths_to_show: int = 10
-    ) -> Dict[str, pd.DataFrame]:
+    def get_price_paths_df(self, results: Dict, num_paths_to_show: int = 10) -> Dict[str, pd.DataFrame]:
         """Convert simulation results to DataFrames for visualization.
 
         Args:
@@ -269,17 +249,14 @@ class MonteCarloSimulation:
         # Portfolio value for each simulation
         portfolio_values = (
             np.sum(
-                (final_prices / self.initial_prices[:, np.newaxis])
-                * (weight_per_asset / num_assets),
+                (final_prices / self.initial_prices[:, np.newaxis]) * (weight_per_asset / num_assets),
                 axis=0,
             )
             * num_assets
         )
 
         # Calculate returns
-        portfolio_returns = (
-            portfolio_values - initial_portfolio_value
-        ) / initial_portfolio_value
+        portfolio_returns = (portfolio_values - initial_portfolio_value) / initial_portfolio_value
 
         # VaR calculation
         var_percentile = (1 - confidence_level) * 100

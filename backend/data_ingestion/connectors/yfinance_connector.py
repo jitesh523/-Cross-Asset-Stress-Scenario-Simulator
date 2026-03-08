@@ -39,9 +39,7 @@ class YFinanceConnector:
             logger.info(f"Fetching data for {ticker} from {start_date} to {end_date}")
 
             ticker_obj = yf.Ticker(ticker)
-            df = ticker_obj.history(
-                start=start_date, end=end_date, interval=interval, auto_adjust=False
-            )
+            df = ticker_obj.history(start=start_date, end=end_date, interval=interval, auto_adjust=False)
 
             if df.empty:
                 logger.warning(f"No data found for {ticker}")
@@ -103,9 +101,7 @@ class YFinanceConnector:
             return pd.DataFrame()
 
         combined_df = pd.concat(all_data, ignore_index=True)
-        logger.info(
-            f"Fetched total {len(combined_df)} records for {len(all_data)} tickers"
-        )
+        logger.info(f"Fetched total {len(combined_df)} records for {len(all_data)} tickers")
 
         return combined_df
 
@@ -127,9 +123,7 @@ class YFinanceConnector:
                 "name": info.get("longName", info.get("shortName", ticker)),
                 "sector": info.get("sector", "Unknown"),
                 "currency": info.get("currency", "USD"),
-                "description": info.get("longBusinessSummary", "")[
-                    :500
-                ],  # Limit to 500 chars
+                "description": info.get("longBusinessSummary", "")[:500],  # Limit to 500 chars
             }
         except Exception as e:
             logger.error(f"Error fetching info for {ticker}: {e}")

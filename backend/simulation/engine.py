@@ -27,9 +27,7 @@ class SimulationEngine:
         self.db = db
         self.correlation_calculator = CorrelationMatrix()
 
-    def prepare_simulation_data(
-        self, tickers: List[str], start_date: str, end_date: str
-    ) -> Dict:
+    def prepare_simulation_data(self, tickers: List[str], start_date: str, end_date: str) -> Dict:
         """Prepare data for simulation from database.
 
         Args:
@@ -42,8 +40,15 @@ class SimulationEngine:
         """
         logger.info(f"Preparing simulation data for {len(tickers)} tickers")
 
+        if not tickers:
+            raise ValueError("At least one ticker is required")
+
+        if start_date >= end_date:
+            raise ValueError(f"start_date ({start_date}) must be before end_date ({end_date})")
+
         # Fetch price data
         all_data = []
+        missing_tickers = []
         for ticker in tickers:
             query = (
                 self.db.query(AssetPrice)
@@ -57,16 +62,20 @@ class SimulationEngine:
 
             data = query.all()
             if data:
-                df = pd.DataFrame(
-                    [
-                        {"date": d.date, "close": d.close, "ticker": d.ticker}
-                        for d in data
-                    ]
-                )
+                df = pd.DataFrame([{"date": d.date, "close": d.close, "ticker": d.ticker} for d in data])
                 all_data.append(df)
+            else:
+                missing_tickers.append(ticker)
+
+        if missing_tickers:
+            logger.warning(f"No data found for tickers: {', '.join(missing_tickers)}")
 
         if not all_data:
-            raise ValueError("No data found in database")
+            raise ValueError(
+                f"No price data found for any of the requested tickers "
+                f"({', '.join(tickers)}) between {start_date} and {end_date}. "
+                f"Make sure data has been ingested first."
+            )
 
         # Combine data
         combined_df = pd.concat(all_data, ignore_index=True)
@@ -77,17 +86,11 @@ class SimulationEngine:
 
         # Calculate statistics
         initial_prices = {ticker: price_df[ticker].iloc[-1] for ticker in tickers}
-        expected_returns = {
-            ticker: returns_df[ticker].mean() * 252 for ticker in tickers
-        }  # Annualized
-        volatilities = {
-            ticker: returns_df[ticker].std() * np.sqrt(252) for ticker in tickers
-        }  # Annualized
+        expected_returns = {ticker: returns_df[ticker].mean() * 252 for ticker in tickers}  # Annualized
+        volatilities = {ticker: returns_df[ticker].std() * np.sqrt(252) for ticker in tickers}  # Annualized
 
         # Calculate correlation matrix
-        correlation_matrix = self.correlation_calculator.calculate_from_returns(
-            returns_df
-        )
+        correlation_matrix = self.correlation_calculator.calculate_from_returns(returns_df)
 
         return {
             "price_df": price_df,
@@ -200,9 +203,7 @@ class SimulationEngine:
         data = self.prepare_simulation_data(tickers, start_date, end_date)
 
         # Create historical simulation
-        hist_sim = HistoricalSimulation(
-            historical_returns=data["returns_df"], initial_prices=data["initial_prices"]
-        )
+        hist_sim = HistoricalSimulation(historical_returns=data["returns_df"], initial_prices=data["initial_prices"])
 
         # Run simulation
         results = hist_sim.simulate(
@@ -301,9 +302,7 @@ class SimulationEngine:
             for ticker, multiplier in adjustments["volatility_multiplier"].items():
                 if ticker in data["volatilities"]:
                     data["volatilities"][ticker] *= multiplier
-                    logger.info(
-                        f"Applied volatility multiplier of {multiplier:.2f} to {ticker}"
-                    )
+                    logger.info(f"Applied volatility multiplier of {multiplier:.2f} to {ticker}")
 
         # Apply correlation multiplier
         if "correlation_multiplier" in adjustments:
@@ -320,9 +319,7 @@ class SimulationEngine:
                         corr_matrix[i, j] = np.clip(corr_matrix[i, j], -0.99, 0.99)
 
             # Make matrix positive definite if needed
-            data["correlation_matrix"] = (
-                self.correlation_calculator._make_positive_definite(corr_matrix)
-            )
+            data["correlation_matrix"] = self.correlation_calculator._make_positive_definite(corr_matrix)
             logger.info(f"Applied correlation multiplier of {multiplier:.2f}")
 
         return data

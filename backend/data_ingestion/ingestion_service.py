@@ -57,9 +57,7 @@ class IngestionService:
         Returns:
             Number of records inserted
         """
-        logger.info(
-            f"Ingesting {len(tickers)} {asset_class} tickers from {start_date} to {end_date}"
-        )
+        logger.info(f"Ingesting {len(tickers)} {asset_class} tickers from {start_date} to {end_date}")
 
         # Fetch data
         df = self.yf_connector.fetch_multiple_tickers(tickers, start_date, end_date)
@@ -116,14 +114,10 @@ class IngestionService:
         Returns:
             Number of records inserted
         """
-        logger.info(
-            f"Ingesting {len(indicator_ids)} economic indicators from {start_date} to {end_date}"
-        )
+        logger.info(f"Ingesting {len(indicator_ids)} economic indicators from {start_date} to {end_date}")
 
         # Fetch data
-        df = self.fred_connector.fetch_multiple_series(
-            indicator_ids, start_date, end_date
-        )
+        df = self.fred_connector.fetch_multiple_series(indicator_ids, start_date, end_date)
 
         if df.empty:
             logger.warning("No economic data fetched")
@@ -146,9 +140,7 @@ class IngestionService:
         logger.info(f"Inserted {records_inserted} economic indicator records")
         return records_inserted
 
-    def ingest_asset_metadata(
-        self, db: Session, tickers: List[str], asset_class: str
-    ) -> int:
+    def ingest_asset_metadata(self, db: Session, tickers: List[str], asset_class: str) -> int:
         """Ingest asset metadata into database.
 
         Args:
@@ -203,40 +195,24 @@ class IngestionService:
         results = {}
 
         # Ingest equities
-        results["equities"] = self.ingest_asset_prices(
-            db, EQUITY_TICKERS, "equity", start_date, end_date
-        )
-        results["equity_metadata"] = self.ingest_asset_metadata(
-            db, EQUITY_TICKERS, "equity"
-        )
+        results["equities"] = self.ingest_asset_prices(db, EQUITY_TICKERS, "equity", start_date, end_date)
+        results["equity_metadata"] = self.ingest_asset_metadata(db, EQUITY_TICKERS, "equity")
 
         # Ingest bonds
-        results["bonds"] = self.ingest_asset_prices(
-            db, BOND_TICKERS, "bond", start_date, end_date
-        )
+        results["bonds"] = self.ingest_asset_prices(db, BOND_TICKERS, "bond", start_date, end_date)
         results["bond_metadata"] = self.ingest_asset_metadata(db, BOND_TICKERS, "bond")
 
         # Ingest commodities
-        results["commodities"] = self.ingest_asset_prices(
-            db, COMMODITY_TICKERS, "commodity", start_date, end_date
-        )
-        results["commodity_metadata"] = self.ingest_asset_metadata(
-            db, COMMODITY_TICKERS, "commodity"
-        )
+        results["commodities"] = self.ingest_asset_prices(db, COMMODITY_TICKERS, "commodity", start_date, end_date)
+        results["commodity_metadata"] = self.ingest_asset_metadata(db, COMMODITY_TICKERS, "commodity")
 
         # Ingest currencies
-        results["currencies"] = self.ingest_asset_prices(
-            db, CURRENCY_TICKERS, "currency", start_date, end_date
-        )
-        results["currency_metadata"] = self.ingest_asset_metadata(
-            db, CURRENCY_TICKERS, "currency"
-        )
+        results["currencies"] = self.ingest_asset_prices(db, CURRENCY_TICKERS, "currency", start_date, end_date)
+        results["currency_metadata"] = self.ingest_asset_metadata(db, CURRENCY_TICKERS, "currency")
 
         # Ingest economic indicators (only if API key is available)
         if settings.fred_api_key:
-            results["economic_indicators"] = self.ingest_economic_indicators(
-                db, INDICATOR_IDS, start_date, end_date
-            )
+            results["economic_indicators"] = self.ingest_economic_indicators(db, INDICATOR_IDS, start_date, end_date)
         else:
             logger.warning("FRED API key not found, skipping economic indicators")
             results["economic_indicators"] = 0

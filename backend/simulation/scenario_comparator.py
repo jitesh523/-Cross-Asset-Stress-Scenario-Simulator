@@ -54,10 +54,7 @@ class ScenarioComparator:
 
             # Severity score: weighted combination of metrics
             severity = (
-                abs(portfolio_var) * 0.4
-                + abs(portfolio_cvar) * 0.3
-                + prob_loss * 0.2
-                + abs(worst_asset_return) * 0.1
+                abs(portfolio_var) * 0.4 + abs(portfolio_cvar) * 0.3 + prob_loss * 0.2 + abs(worst_asset_return) * 0.1
             )
 
             ranked.append(

@@ -15,9 +15,7 @@ class AssetPrice(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     ticker = Column(String(20), nullable=False, index=True)
-    asset_class = Column(
-        String(50), nullable=False, index=True
-    )  # equity, bond, commodity, currency
+    asset_class = Column(String(50), nullable=False, index=True)  # equity, bond, commodity, currency
     date = Column(DateTime, nullable=False, index=True)
     open = Column(Float)
     high = Column(Float)
@@ -33,9 +31,7 @@ class AssetPrice(Base):
     )
 
     def __repr__(self):
-        return (
-            f"<AssetPrice(ticker={self.ticker}, date={self.date}, close={self.close})>"
-        )
+        return f"<AssetPrice(ticker={self.ticker}, date={self.date}, close={self.close})>"
 
 
 class EconomicIndicator(Base):

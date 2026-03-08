@@ -11,27 +11,17 @@ def test_regime_aware_convergence():
     # No initial correlation
     correlation_matrix = np.array([[1.0, 0.0], [0.0, 1.0]])
 
-    mc = MonteCarloSimulation(
-        initial_prices, expected_returns, volatilities, correlation_matrix
-    )
+    mc = MonteCarloSimulation(initial_prices, expected_returns, volatilities, correlation_matrix)
 
     # Run Normal
-    results_normal = mc.simulate(
-        num_simulations=1000, num_days=20, random_seed=42, regime_aware=False
-    )
+    results_normal = mc.simulate(num_simulations=1000, num_days=20, random_seed=42, regime_aware=False)
     returns_normal = results_normal["returns"]
-    corr_normal = np.corrcoef(returns_normal[0].flatten(), returns_normal[1].flatten())[
-        0, 1
-    ]
+    corr_normal = np.corrcoef(returns_normal[0].flatten(), returns_normal[1].flatten())[0, 1]
 
     # Run Regime-Aware
-    results_regime = mc.simulate(
-        num_simulations=1000, num_days=20, random_seed=42, regime_aware=True
-    )
+    results_regime = mc.simulate(num_simulations=1000, num_days=20, random_seed=42, regime_aware=True)
     returns_regime = results_regime["returns"]
-    corr_regime = np.corrcoef(returns_regime[0].flatten(), returns_regime[1].flatten())[
-        0, 1
-    ]
+    corr_regime = np.corrcoef(returns_regime[0].flatten(), returns_regime[1].flatten())[0, 1]
 
     # In regime-aware, correlation should have drifted upward due to stress paths
     # Note: We use the same seed, so the shocks are the same, but the transformation changes.

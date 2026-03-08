@@ -80,9 +80,7 @@ async def list_scenarios(
     """
     try:
         service = ScenarioService(db)
-        scenarios = service.list_scenarios(
-            category=category, is_predefined=is_predefined
-        )
+        scenarios = service.list_scenarios(category=category, is_predefined=is_predefined)
         return scenarios
 
     except Exception as e:
@@ -183,9 +181,7 @@ async def create_scenario(scenario: ScenarioCreate, db: Session = Depends(get_db
 
 
 @router.post("/generate-ai")
-async def generate_ai_scenario(
-    request: AIGenerateRequest, db: Session = Depends(get_db)
-):
+async def generate_ai_scenario(request: AIGenerateRequest, db: Session = Depends(get_db)):
     """Generate a scenario using AI.
 
     Args:
@@ -235,9 +231,7 @@ async def generate_ai_scenario(
 
 
 @router.post("/{scenario_id}/run")
-async def run_scenario(
-    scenario_id: int, request: ScenarioRunRequest, db: Session = Depends(get_db)
-):
+async def run_scenario(scenario_id: int, request: ScenarioRunRequest, db: Session = Depends(get_db)):
     """Run a simulation with a specific scenario.
 
     Args:

@@ -15,9 +15,7 @@ class Scenario(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(200), unique=True, nullable=False, index=True)
     description = Column(String(1000))
-    category = Column(
-        String(50), index=True
-    )  # market_crash, rate_shock, volatility_spike, etc.
+    category = Column(String(50), index=True)  # market_crash, rate_shock, volatility_spike, etc.
 
     # Scenario parameters stored as JSON
     parameters = Column(JSON, nullable=False)

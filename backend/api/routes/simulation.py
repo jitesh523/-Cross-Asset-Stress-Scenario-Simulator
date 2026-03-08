@@ -63,9 +63,7 @@ async def run_simulation(request: SimulationRequest, db: Session = Depends(get_d
         Simulation results
     """
     try:
-        logger.info(
-            f"Running {request.method} simulation for {len(request.tickers)} tickers"
-        )
+        logger.info(f"Running {request.method} simulation for {len(request.tickers)} tickers")
 
         engine = SimulationEngine(db)
 
@@ -134,9 +132,7 @@ async def compare_methods(
 
 
 @router.post("/optimize")
-async def optimize_portfolio(
-    request: OptimizationRequest, db: Session = Depends(get_db)
-):
+async def optimize_portfolio(request: OptimizationRequest, db: Session = Depends(get_db)):
     """Optimize portfolio weights.
 
     Args:
@@ -150,15 +146,11 @@ async def optimize_portfolio(
         engine = SimulationEngine(db)
 
         # Prepare data
-        data = engine.prepare_simulation_data(
-            request.tickers, request.start_date, request.end_date
-        )
+        data = engine.prepare_simulation_data(request.tickers, request.start_date, request.end_date)
 
         # Apply scenario adjustments if provided
         if request.scenario_adjustments:
-            data = engine._apply_scenario_adjustments(
-                data, request.scenario_adjustments
-            )
+            data = engine._apply_scenario_adjustments(data, request.scenario_adjustments)
 
         # Initialize optimizer
         optimizer = PortfolioOptimizer(

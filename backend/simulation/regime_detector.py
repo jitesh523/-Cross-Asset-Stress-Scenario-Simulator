@@ -75,10 +75,7 @@ class RegimeDetector:
             vol = row["rolling_vol"]
             ret = row["rolling_return"]
 
-            if (
-                ret < self.crisis_return_threshold
-                and vol > mean_vol * self.crisis_vol_mult
-            ):
+            if ret < self.crisis_return_threshold and vol > mean_vol * self.crisis_vol_mult:
                 regimes.append("CRISIS")
             elif ret < 0 and vol > mean_vol:
                 regimes.append("BEAR")

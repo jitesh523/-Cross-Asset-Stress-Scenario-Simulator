@@ -102,9 +102,7 @@ class TestDataValidator:
         """Test outlier detection using IQR method."""
         df = pd.DataFrame({"value": [1, 2, 3, 4, 5, 100]})  # 100 is an outlier
 
-        has_no_outliers, outliers = DataValidator.check_outliers(
-            df, "value", method="iqr"
-        )
+        has_no_outliers, outliers = DataValidator.check_outliers(df, "value", method="iqr")
         assert has_no_outliers is False
         assert outliers.sum() > 0
 
@@ -112,8 +110,6 @@ class TestDataValidator:
         """Test outlier detection using Z-score method."""
         df = pd.DataFrame({"value": [1, 2, 3, 4, 5, 100]})  # 100 is an outlier
 
-        has_no_outliers, outliers = DataValidator.check_outliers(
-            df, "value", method="zscore", threshold=2.0
-        )
+        has_no_outliers, outliers = DataValidator.check_outliers(df, "value", method="zscore", threshold=2.0)
         assert has_no_outliers is False
         assert outliers.sum() > 0
