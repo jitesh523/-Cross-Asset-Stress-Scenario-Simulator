@@ -109,7 +109,7 @@ class DataValidator:
             outliers = (df[column] < lower_bound) | (df[column] > upper_bound)
 
         elif method == "zscore":
-            z_scores = np.abs((values - values.mean()) / values.std())
+            z_scores = np.abs((df[column] - values.mean()) / values.std())
             outliers = z_scores > threshold
 
         else:
